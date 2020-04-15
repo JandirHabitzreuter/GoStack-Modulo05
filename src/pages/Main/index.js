@@ -4,9 +4,12 @@ import { Title } from './styles';
 
 export default function Main() {
     return (
-        <Title error={false}>
-            Main
-            <small> Outro Texto</small>
-        </Title>
+        // EXEMPLO
+        // <Title error={false}>
+        //     Main
+        //     <small> Outro Texto</small>
+        // </Title>
+
+        <Title>Main</Title>
     );
 }
