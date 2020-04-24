@@ -1,29 +1,78 @@
-import React from 'react';
+import React, { Component } from 'react';
 
-import { FaGithubAlt, FaPlus } from 'react-icons/fa';
+import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 
-import { Container, SubmitButton, Form } from './styles';
+import { Container, SubmitButton, Form, List } from './styles';
 
-export default function Main() {
-    return (
-        // EXEMPLO
-        // <Title error={false}>
-        //     Main
-        //     <small> Outro Texto</small>
-        // </Title>
+import api from '../../services/api';
 
-        <Container>
-            <h1>
-                <FaGithubAlt />
-                Repositórios
-            </h1>
+export default class Main extends Component {
+    state = {
+        newRepo: '',
+        repositories: [],
+        loading: false,
+    };
 
-            <Form onSubmit={() => {}}>
-                <input type="text" placeholder="Adicionar Repositório" />
-                <SubmitButton>
-                    <FaPlus color="#FFF" size={14} />
-                </SubmitButton>
-            </Form>
-        </Container>
-    );
+    handleInputChange = (e) => {
+        this.setState({ newRepo: e.target.value });
+    };
+
+    handleSubmit = async (e) => {
+        e.preventDefault(); // Evitar que o formulário faça refresh na pagina
+
+        const { newRepo, repositories } = this.state;
+
+        if (newRepo) {
+            this.setState({ loading: true });
+
+            const response = await api.get(`/repos/${newRepo}`);
+
+            const data = {
+                name: response.data.full_name,
+            };
+
+            this.setState({
+                repositories: [...repositories, data],
+                newRepo: '',
+                loading: false,
+            });
+        }
+    };
+
+    render() {
+        const { newRepo, loading, repositories } = this.state;
+        return (
+            <Container>
+                <h1>
+                    <FaGithubAlt />
+                    Repositórios
+                </h1>
+
+                <Form onSubmit={this.handleSubmit}>
+                    <input
+                        type="text"
+                        placeholder="Adicionar Repositório"
+                        value={newRepo}
+                        onChange={this.handleInputChange}
+                    />
+                    <SubmitButton loading={loading}>
+                        {loading ? (
+                            <FaSpinner color="#FFF" size={14} />
+                        ) : (
+                            <FaPlus color="#FFF" size={14} />
+                        )}
+                    </SubmitButton>
+                </Form>
+
+                <List>
+                    {repositories.map((item) => (
+                        <li key={item.name}>
+                            <span>{item.name}</span>
+                            <a href="#"> Detalhes</a>
+                        </li>
+                    ))}
+                </List>
+            </Container>
+        );
+    }
 }
